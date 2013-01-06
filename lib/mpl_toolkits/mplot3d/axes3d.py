@@ -1639,6 +1639,9 @@ class Axes3D(Axes):
                 polyc.set_norm(norm)
         else:
             if shade:
+                v1 = verts[:, 0] - verts[:, 1]
+                v2 = verts[:, 1] - verts[:, 2]
+                normals = np.cross(v1, v2)
                 colset = self._shade_colors(color, normals)
             else:
                 colset = color
@@ -1835,26 +1838,6 @@ class Axes3D(Axes):
 
         verts = np.concatenate((xt, yt, zt), axis=2)
         vertex_vals = kwargs.pop('vertex_vals', zt)
-
-        # Only need these vectors to shade if there is no cmap
-        if cmap is None and shade:
-            totpts = len(verts)
-            v1 = np.empty((totpts, 3))
-            v2 = np.empty((totpts, 3))
-            # This indexes the vertex points
-            which_pt = 0
-
-        for i in xrange(len(verts)):
-            # Only need vectors to shade if no cmap
-            if cmap is None and shade:
-                v1[which_pt] = np.array(verts[i,0]) - np.array(verts[i,1])
-                v2[which_pt] = np.array(verts[i,1]) - np.array(verts[i,2])
-                which_pt += 1
-
-        if cmap is None and shade:
-            normals = np.cross(v1, v2)
-        else:
-            normals = []
 
         polyc = art3d.Poly3DCollection(verts, *args, **kwargs)
 
