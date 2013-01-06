@@ -1767,6 +1767,11 @@ class Axes3D(Axes):
         *X*, *Y*, *Z* Data values as 1D arrays
         *color*       Color of the surface patches
         *cmap*        A colormap for the surface patches.
+        *vertex_vals* Array of values associated with the vertices. In
+                      case cmap is given, each surface patch color is
+                      derived from the average of the three associated
+                      vertex values. Default values are the vertex
+                      z-coordinates.
         *norm*        An instance of Normalize to map values to colors
         *vmin*        Minimum value to map
         *vmax*        Maximum value to map
@@ -1830,6 +1835,7 @@ class Axes3D(Axes):
         zt = np.array(z)[triangles][...,np.newaxis]
 
         verts = np.concatenate((xt, yt, zt), axis=2)
+        vertex_vals = kwargs.pop('vertex_vals', zt)
 
         # Only need these vectors to shade if there is no cmap
         if cmap is None and shade:
@@ -1839,11 +1845,7 @@ class Axes3D(Axes):
             # This indexes the vertex points
             which_pt = 0
 
-        colset = []
         for i in xrange(len(verts)):
-            avgzsum = verts[i,0,2] + verts[i,1,2] + verts[i,2,2]
-            colset.append(avgzsum / 3.0)
-
             # Only need vectors to shade if no cmap
             if cmap is None and shade:
                 v1[which_pt] = np.array(verts[i,0]) - np.array(verts[i,1])
@@ -1858,7 +1860,9 @@ class Axes3D(Axes):
         polyc = art3d.Poly3DCollection(verts, *args, **kwargs)
 
         if cmap:
-            colset = np.array(colset)
+            def avg_vertex_val((i, j, k)):
+                return (vertex_vals[i] + vertex_vals[j] + vertex_vals[k]) / 3.0
+            colset = np.array(map(avg_vertex_val, triangles))
             polyc.set_array(colset)
             if vmin is not None or vmax is not None:
                 polyc.set_clim(vmin, vmax)
