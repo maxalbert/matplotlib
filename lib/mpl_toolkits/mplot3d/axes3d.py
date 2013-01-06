@@ -1761,22 +1761,21 @@ class Axes3D(Axes):
 
     def plot_trisurf(self, *args, **kwargs):
         """
-        ============= ================================================
+        ============= ========================================================
         Argument      Description
-        ============= ================================================
+        ============= ========================================================
         *X*, *Y*, *Z* Data values as 1D arrays
-        *color*       Color of the surface patches
+        *color*       Color of the surface patches (ignored if cmap is given).
         *cmap*        A colormap for the surface patches.
-        *vertex_vals* Array of values associated with the vertices. In
-                      case cmap is given, each surface patch color is
-                      derived from the average of the three associated
-                      vertex values. Default values are the vertex
-                      z-coordinates.
+        *vertex_vals* Array of values associated with the vertices. In case
+                      cmap is given, each surface patch color is derived from
+                      the average of the three associated vertex values.
+                      Default values are the vertex z-coordinates.
         *norm*        An instance of Normalize to map values to colors
         *vmin*        Minimum value to map
         *vmax*        Maximum value to map
         *shade*       Whether to shade the facecolors
-        ============= ================================================
+        ============= ========================================================
 
         The (optional) triangulation can be specified in one of two ways;
         either::
