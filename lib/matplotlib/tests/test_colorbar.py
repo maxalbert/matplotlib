@@ -8,9 +8,9 @@ from numpy import ma
 import matplotlib
 from matplotlib.testing.decorators import image_comparison, cleanup
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from matplotlib import rcParams
 from matplotlib.colors import BoundaryNorm
-from matplotlib.cm import get_cmap
 from matplotlib.colorbar import ColorbarBase
 
 
@@ -23,7 +23,7 @@ def _get_cmap_norms():
     colorbar_extension_length.
     """
     # Create a color map and specify the levels it represents.
-    cmap = get_cmap("RdBu", lut=5)
+    cmap = cm.get_cmap("RdBu", lut=5)
     clevs = [-5., -2.5, -.5, .5, 1.5, 3.5]
     # Define norms for the color maps.
     norms = dict()
@@ -251,6 +251,23 @@ def test_colorbarbase():
     # smoke test from #3805
     ax = plt.gca()
     ColorbarBase(ax, plt.cm.bone)
+
+
+@cleanup
+def test_can_create_colorbar_without_mappable():
+    plt.figure()
+    plt.colorbar(cmap=cm.hot, vmin=1.2, vmax=4.3)
+
+
+@image_comparison(
+        baseline_images=['colorbars_with_specified_cmaps'],
+        extensions=['png'])
+def test_colorbar_honors_cmap_argument():
+    fig = plt.figure()
+    np.random.seed(0)
+    im = plt.imshow(np.random.random_sample((40, 40)), interpolation='none')
+    plt.colorbar(im, cmap=cm.coolwarm)
+    plt.colorbar(cmap=cm.hot, vmin=1.2, vmax=4.3)
 
 
 if __name__ == '__main__':
