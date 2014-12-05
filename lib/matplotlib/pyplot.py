@@ -2144,14 +2144,40 @@ def _setup_pyplot_info_docstrings():
 
 ## Plotting part 1: manually generated functions and wrappers ##
 
-def colorbar(mappable=None, cax=None, ax=None, **kw):
-    if mappable is None:
+def _get_mappable(mappable, cmap, vmin, vmax):
+    """
+    Return 'mappable' if it is provided. Otherwise create a
+    ScalarMappable from `vmin`, `vmax` (and optionally `cmap`)
+    if they are given. Otherwise return the current colorable
+    artist. Raise an exception if none of these methods worked.
+    """
+    if mappable is not None:
+        if vmin is not None or vmax is not None:
+            warnings.warn("Ignoring provided arguments 'vmin', 'vmax' "
+                          "because 'mappable' was explicitly given.")
+    elif vmin is not None and vmax is not None:
+        # Create ScalarMappable from cmap, vmin, vmax if all of them are given
+        mappable = cm.ScalarMappable()
+        mappable.set_array([])
+        mappable.set_clim(vmin, vmax)
+    else:
+        # Return the current colorable artist
         mappable = gci()
-        if mappable is None:
-            raise RuntimeError('No mappable was found to use for colorbar '
-                               'creation. First define a mappable such as '
-                               'an image (with imshow) or a contour set ('
-                               'with contourf).')
+
+    if mappable is None:
+        raise RuntimeError('No mappable was found to use for colorbar '
+                           'creation. Either define a mappable such as '
+                           'an image (with imshow) or a contour set ('
+                           'with contourf), or call "colorbar" directly '
+                           'with the arguments "cmap", "vmin", "vmax".')
+
+    mappable.set_cmap(cmap)
+    return mappable
+
+
+def colorbar(mappable=None, cax=None, ax=None, cmap=None, vmin=None, vmax=None, **kw):
+    mappable = _get_mappable(mappable, cmap, vmin, vmax)
+
     if ax is None:
         ax = gca()
 
